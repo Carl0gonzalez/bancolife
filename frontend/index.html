@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BancoLite - Sistema Bancario</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 40px;
+        padding: 25px;
+        border: 1px solid #e1e8ed;
+        border-radius: 10px;
+        background: #f8f9fa;
+      }
+
+      .section h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #34495e;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+
+      button {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: transform 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .response {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-online {
+        background: #28a745;
+      }
+
+      .status-offline {
+        background: #dc3545;
+      }
+
+      .api-status {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🏦 BancoLite</h1>
+        <p>
+          Sistema Bancario Simple - Gestión de Clientes, Cuentas y
+          Transferencias
+        </p>
+      </div>
+
+      <div class="content">
+        <!-- Estado de la API -->
+        <div class="api-status">
+          <h3>
+            Estado de la API:
+            <span id="api-status" class="status-indicator status-offline"></span
+            ><span id="api-text">Desconectado</span>
+          </h3>
+        </div>
+
+        <div class="grid">
+          <!-- Sección de Clientes -->
+          <div class="section">
+            <h2>👥 Gestión de Clientes</h2>
+
+            <form id="clienteForm">
+              <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required />
+              </div>
+
+              <div class="form-group">
+                <label for="correo">Correo Electrónico:</label>
+                <input type="email" id="correo" name="correo" required />
+              </div>
+
+              <button type="submit">Crear Cliente</button>
+            </form>
+
+            <button onclick="cargarClientes()" style="margin-top: 10px">
+              Cargar Clientes
+            </button>
+
+            <div
+              id="clientesResponse"
+              class="response"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Sección de Cuentas -->
+          <div class="section">
+            <h2>💳 Gestión de Cuentas</h2>
+
+            <form id="cuentaForm">
+              <div class="form-group">
+                <label for="cliente_id">ID del Cliente:</label>
+                <input
+                  type="number"
+                  id="cliente_id"
+                  name="cliente_id"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="saldo_inicial">Saldo Inicial:</label>
+                <input
+                  type="number"
+                  id="saldo_inicial"
+                  name="saldo_inicial"
+                  step="0.01"
+                  value="0.00"
+                />
+              </div>
+
+              <button type="submit">Crear Cuenta</button>
+            </form>
+
+            <button onclick="cargarCuentas()" style="margin-top: 10px">
+              Cargar Cuentas
+            </button>
+
+            <div
+              id="cuentasResponse"
+              class="response"
+              style="display: none"
+            ></div>
+          </div>
+
+          <!-- Sección de Transferencias -->
+          <div class="section">
+            <h2>💸 Transferencias</h2>
+
+            <form id="transferenciaForm">
+              <div class="form-group">
+                <label for="cuenta_origen">Cuenta Origen (ID):</label>
+                <input
+                  type="number"
+                  id="cuenta_origen"
+                  name="cuenta_origen"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="cuenta_destino">Cuenta Destino (ID):</label>
+                <input
+                  type="number"
+                  id="cuenta_destino"
+                  name="cuenta_destino"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="monto">Monto:</label>
+                <input
+                  type="number"
+                  id="monto"
+                  name="monto"
+                  step="0.01"
+                  required
+                />
+              </div>
+
+              <button type="submit">Realizar Transferencia</button>
+            </form>
+
+            <button onclick="cargarTransferencias()" style="margin-top: 10px">
+              Cargar Transferencias
+            </button>
+
+            <div
+              id="transferenciasResponse"
+              class="response"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
